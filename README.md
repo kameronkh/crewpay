@@ -1,4 +1,4 @@
-# CrewPay — Job Execution Platform
+# Crewmate — Job Execution Platform
 
 Per-job pay that keeps construction crews accountable and on schedule.
 
@@ -30,7 +30,7 @@ Per-job pay that keeps construction crews accountable and on schedule.
 ### 1. Create a Supabase project
 
 1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Click **New Project** — give it a name like "crewpay"
+2. Click **New Project** — give it a name like "crewmate"
 3. Save your database password somewhere safe
 4. Wait for the project to spin up (~1 min)
 
@@ -67,7 +67,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you should see the CrewPay login screen.
+Open [http://localhost:3000](http://localhost:3000) — you should see the Crewmate login screen.
 
 ---
 
@@ -103,7 +103,7 @@ Your app will be live at `https://your-project.vercel.app` in about 2 minutes.
 ## Project Structure
 
 ```
-crewpay/
+crewmate/
 ├── app/
 │   ├── page.tsx                    # Login / sign-up
 │   ├── foreman/

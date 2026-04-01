@@ -1,13 +1,13 @@
-# CrewPay — Project Map
+# Crewmate — Project Map
 
 > **Living document.** Update this file whenever a new route, table, component, or integration is added.
-> Last updated: 2026-03-30
+> Last updated: 2026-04-01
 
 ---
 
 ## What the App Does
 
-CrewPay is a construction crew job-execution platform. Foremen create jobs, assign tasks to workers, and track labor in real time. Workers check in, clock off, and get paid based on budgeted hours — giving them a direct incentive to work efficiently. The app handles pay calculation, bonus logic, margin tracking, and crew management.
+Crewmate is a construction crew job-execution platform. Foremen create jobs, assign tasks to workers, and track labor in real time. Workers check in, clock off, and get paid based on budgeted hours — giving them a direct incentive to work efficiently. The app handles pay calculation, bonus logic, margin tracking, and crew management.
 
 ---
 
@@ -15,22 +15,21 @@ CrewPay is a construction crew job-execution platform. Foremen create jobs, assi
 
 | Layer | Status | Notes |
 |---|---|---|
-| `crewpay-demo-v4.html` | ✅ Feature-complete (v4) | Single-file React demo, opens directly in browser |
-| `crewpay-app/` | 🚧 v1 scaffold | Next.js + Supabase app; core auth + task flow only |
-| `crewpay-app-v2.zip` | 🚧 v2 scaffold | Adds team invite join flow, additional pages |
+| `crewmate-demo-v4.html` | ✅ Feature-complete (v4) | Single-file React demo, opens directly in browser |
+| `crewmate-app/` | 🚧 v1 scaffold | Next.js + Supabase app; core auth + task flow only |
 
-**The HTML demo (`crewpay-demo-v4.html`) is the source of truth for product features.** The Next.js app needs to catch up. All v4 features exist only in the demo today.
+**The HTML demo (`crewmate-demo-v4.html`) is the source of truth for product features.** The Next.js app needs to catch up. All v4 features exist only in the demo today.
 
 ---
 
 ## Tech Stack
 
-### HTML Demo (`crewpay-demo-v4.html`)
+### HTML Demo (`crewmate-demo-v4.html`)
 - React 18 via Babel standalone (no build step — opens directly in browser)
 - All state in-memory (no backend)
 - Tailwind CSS via CDN
 
-### Next.js App (`crewpay-app/`)
+### Next.js App (`crewmate-app/`)
 - **Framework:** Next.js 14 (App Router), TypeScript
 - **Auth & Database:** Supabase (auth.users + row-level security)
 - **Styling:** Tailwind CSS
@@ -38,10 +37,22 @@ CrewPay is a construction crew job-execution platform. Foremen create jobs, assi
 
 ---
 
+## Infrastructure
+
+| Service | Project Name | ID / Slug | Notes |
+|---|---|---|---|
+| GitHub | `crewmate` | `kameronkh/crewmate` | Main branch auto-deploys to Vercel |
+| Vercel | `crewmate` | `kameronkhs-projects/crewmate` | Production URL below |
+| Supabase | `Crewmate` | `xhoxxpddmpwcrhqapbqz` | Dedicated project — not shared |
+
+**Production URL:** `https://crewmate-kameronkhs-projects.vercel.app`
+
+---
+
 ## Repository Structure
 
 ```
-crewpay-app/
+crewmate-app/
 ├── app/
 │   ├── page.tsx                    # Login / signup
 │   ├── layout.tsx                  # Root layout (fonts, globals)
@@ -91,7 +102,9 @@ crewpay-app/
 
 ## Database Tables
 
-All tables live in Supabase. Row-level security is enabled on every table.
+All tables live in Supabase (`xhoxxpddmpwcrhqapbqz`). Row-level security is enabled on every table.
+
+> ⚠️ **Schema not yet applied to the Crewmate Supabase project.** Run `supabase/schema.sql` in the SQL Editor before the app will function.
 
 ### `profiles`
 Extends `auth.users`. One row per user.
@@ -217,13 +230,16 @@ Stackable multipliers applied to market rates:
 ```bash
 # .env.local (copy from .env.example — never commit real values)
 
-# Supabase — from supabase.com → Project → Settings → API
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+# Supabase — Crewmate project (xhoxxpddmpwcrhqapbqz)
+# Get from: supabase.com → Crewmate project → Settings → API
+NEXT_PUBLIC_SUPABASE_URL=https://xhoxxpddmpwcrhqapbqz.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from Supabase dashboard>
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000    # change to prod URL on deploy
 ```
+
+> ⚠️ **These are already set in Vercel** for the production deployment. For local dev, copy `.env.example` → `.env.local` and fill in real values.
 
 ---
 
@@ -231,14 +247,15 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000    # change to prod URL on deploy
 
 | Service | Purpose | Where configured |
 |---|---|---|
-| Supabase | Auth, database, RLS | supabase.com project dashboard |
-| Vercel | Deployment | vercel.com — connect GitHub repo |
+| Supabase | Auth, database, RLS | supabase.com → Crewmate project |
+| Vercel | Deployment | vercel.com → kameronkhs-projects/crewmate |
+| GitHub | Source control + CI | github.com/kameronkh/crewmate |
 
 ---
 
 ## v4 Feature Backlog (demo → Next.js app)
 
-These features exist in `crewpay-demo-v4.html` and need to be built into the Next.js app:
+These features exist in `crewmate-demo-v4.html` and need to be built into the Next.js app:
 
 - [ ] **Rate Sheet tab** — editable market rate + cost rate, OT/night/rush multipliers, CSV export, competitive market benchmarks (residential vs. commercial), rate as task picklist
 - [ ] **Gross margin per job** — revenue from completed tasks × billing rate
@@ -249,6 +266,16 @@ These features exist in `crewpay-demo-v4.html` and need to be built into the Nex
 - [ ] **Bonus toggle** — job-level; visible to worker on task card
 - [ ] **Clock-off note** — required note when task is incomplete at clock-off
 - [ ] **DB schema additions** — `jobs.location`, `jobs.contract_value`, `jobs.bonus_enabled`, `tasks.miles`, `tasks.clock_off_note`, `tasks.rate_code`, new `change_orders` table, new `rate_sheet` table
+
+---
+
+## Immediate Next Steps
+
+Before the app can accept sign-ups on production:
+
+1. **Run the schema** — open Supabase → Crewmate project (`xhoxxpddmpwcrhqapbqz`) → SQL Editor → paste `supabase/schema.sql` → Run
+2. **Test sign-up flow** — create a foreman account on the live URL
+3. **Test worker flow** — create a worker account, assign a task via foreman, check in/out as worker
 
 ---
 
@@ -264,16 +291,3 @@ This project follows the **Clean Dev Protocol**. Key rules:
 6. **Update this file** when adding routes, tables, or integrations
 
 Full protocol: `/mnt/.claude/skills/clean-dev-protocol/SKILL.md`
-
----
-
-## HTML Demo Files (reference only)
-
-| File | Description |
-|---|---|
-| `crewpay-demo-v4.html` | ✅ Current — all v4 features, audited and stable |
-| `crewpay-demo-v3.html` | Previous version |
-| `crewpay-demo-v2.html` | Previous version |
-| `crewpay-demo.html` | Original prototype |
-| `crewpay-prototype.jsx` | Early JSX sketch |
-| `crewpay-app-v2.zip` | v2 Next.js app snapshot (adds team join flow) |

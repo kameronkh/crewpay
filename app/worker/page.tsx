@@ -71,7 +71,7 @@ export default function WorkerPage() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div>
-            <span className="font-bold text-blue-700">CrewPay</span>
+            <span className="font-bold text-blue-700">Crewmate</span>
             <span className="text-gray-400 text-xs ml-2">Worker</span>
           </div>
           <button
