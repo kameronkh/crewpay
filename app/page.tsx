@@ -53,7 +53,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-700">CrewPay</h1>
+          <h1 className="text-4xl font-bold text-blue-700">Crewmate</h1>
           <p className="text-gray-500 mt-1 text-sm">Job Execution Platform</p>
         </div>
 
@@ -122,7 +122,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          CrewPay keeps your crews accountable and on schedule.
+          Crewmate keeps your crews accountable and on schedule.
         </p>
       </div>
     </div>
