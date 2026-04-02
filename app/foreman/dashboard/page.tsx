@@ -7,10 +7,12 @@ import TaskRow from '@/components/TaskRow'
 
 export default function Dashboard() {
   const supabase = createClient()
-  const [jobs, setJobs]       = useState<Job[]>([])
-  const [workers, setWorkers] = useState<Profile[]>([])
-  const [expanded, setExpanded] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [jobs, setJobs]             = useState<Job[]>([])
+  const [workers, setWorkers]       = useState<Profile[]>([])
+  const [expanded, setExpanded]     = useState<string | null>(null)
+  const [loading, setLoading]       = useState(true)
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
+  const [copied, setCopied]         = useState(false)
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -19,6 +21,13 @@ export default function Dashboard() {
     const { data: profile } = await supabase
       .from('profiles').select('*').eq('id', user.id).single()
     if (!profile) return
+
+    // Load company invite code
+    if (profile.company_id) {
+      const { data: company } = await supabase
+        .from('companies').select('invite_code').eq('id', profile.company_id).single()
+      setInviteCode(company?.invite_code ?? null)
+    }
 
     // Load jobs with tasks and worker info
     const { data: jobsData } = await supabase
@@ -42,7 +51,6 @@ export default function Dashboard() {
 
   useEffect(() => { load() }, [])
 
-  // Handle check-in
   async function handleCheckIn(taskId: string) {
     await supabase.from('tasks').update({
       status: 'in_progress',
@@ -51,13 +59,19 @@ export default function Dashboard() {
     load()
   }
 
-  // Handle complete
   async function handleComplete(taskId: string, actualHours: number) {
     await supabase.rpc('complete_task', {
       p_task_id: taskId,
       p_actual_hours: actualHours,
     })
     load()
+  }
+
+  function copyInviteCode() {
+    if (!inviteCode) return
+    navigator.clipboard.writeText(inviteCode.toUpperCase())
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   // Stats across all jobs
@@ -97,6 +111,31 @@ export default function Dashboard() {
           sub="On-time incentives" color="text-green-600" />
       </div>
 
+      {/* Invite workers card */}
+      {inviteCode && (
+        <div className="card p-4 mb-6 border-dashed border-blue-200 bg-blue-50">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mb-0.5">
+                Worker Invite Code
+              </p>
+              <p className="text-2xl font-mono font-bold text-blue-800 tracking-widest">
+                {inviteCode.toUpperCase()}
+              </p>
+              <p className="text-xs text-blue-500 mt-0.5">
+                Share this code with workers so they can join your company.
+              </p>
+            </div>
+            <button
+              onClick={copyInviteCode}
+              className="btn-secondary text-xs shrink-0"
+            >
+              {copied ? '✓ Copied!' : 'Copy Code'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Jobs */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Active Jobs</h2>
@@ -118,7 +157,6 @@ export default function Dashboard() {
           }, 0)
           return (
             <div key={job.id} className="card mb-4 overflow-hidden">
-              {/* Job header */}
               <button
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
                 onClick={() => setExpanded(expanded === job.id ? null : job.id)}
@@ -140,7 +178,6 @@ export default function Dashboard() {
                 </div>
               </button>
 
-              {/* Tasks */}
               {expanded === job.id && (
                 <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 space-y-3">
                   {(job.tasks ?? []).length === 0 ? (
