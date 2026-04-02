@@ -121,11 +121,39 @@ crewpay-app/                         ← root (folder name is historical; projec
 | Sign-in form | `supabase.auth.signInWithPassword()` → fetch `profiles.role` → redirect |
 | Sign-up form | `supabase.auth.signUp()` → `profiles.insert({ full_name, role, trade, rate_per_hour })` |
 | Role picker | `'foreman'` or `'worker'` — determines redirect destination |
-| Post-auth redirect | Foreman → `/foreman/dashboard`; Worker → `/worker` |
+| Post-auth redirect (sign-up) | Foreman → `/onboarding`; Worker → `/join` |
+| Post-auth redirect (sign-in) | Checks `company_id`: Foreman with company → `/foreman/dashboard`, no company → `/onboarding`; Worker with company → `/worker`, no company → `/join` |
 
 **State:** `email`, `password`, `mode`, `name`, `role`, `trade`, `rate`, `loading`, `error`
 
-**Known gap:** After sign-up, `company_id` on `profiles` is `null`. Foreman must create a company before any jobs can be created. Company creation is not yet implemented as a dedicated flow — it needs to happen on first dashboard load or as an onboarding step.
+---
+
+### `/onboarding` — Foreman Company Setup
+**File:** `app/onboarding/page.tsx`
+**Role:** Foreman (post sign-up, no company yet)
+
+| Element | Key Functions |
+|---|---|
+| Company name input | `useState('')` |
+| Create company | `companies.insert({ name, owner_id: user.id })` → `profiles.update({ company_id })` |
+| Redirect | → `/foreman/dashboard` on success |
+
+**State:** `companyName`, `saving`, `error`
+
+---
+
+### `/join` — Worker Join Company
+**File:** `app/join/page.tsx`
+**Role:** Worker (post sign-up, no company yet)
+
+| Element | Key Functions |
+|---|---|
+| Invite code input | `useState('')` — uppercase mono display, max 8 chars |
+| Look up company | `companies.select().eq('invite_code', code)` |
+| Join company | `profiles.update({ company_id: company.id })` |
+| Redirect | → `/worker` on success |
+
+**State:** `inviteCode`, `saving`, `error`
 
 ---
 
@@ -255,8 +283,7 @@ actual >  estimated → "X.Xh over"  (red)
 
 All tables in Supabase project `xhoxxpddmpwcrhqapbqz`. RLS enabled on all tables.
 
-> ⚠️ **Schema has NOT been applied to the live Crewmate Supabase project yet.**
-> Run `supabase/schema.sql` in the Supabase SQL Editor before the app will accept sign-ups.
+> ✅ **Schema applied 2026-04-02** via Supabase MCP (`initial_schema` migration). All tables and RLS policies are live on `xhoxxpddmpwcrhqapbqz`. Note: `companies` table also has `invite_code text unique` (8-char auto-generated) not in the original schema.sql — update the file if re-running.
 
 ### `profiles`
 Extends `auth.users`. One row per authenticated user.
@@ -514,10 +541,10 @@ Before the live app can accept real users:
 
 | # | Issue | Priority | Status |
 |---|---|---|---|
-| 1 | Schema not applied to live Supabase project | 🔴 Blocking | Open |
-| 2 | No company creation flow after foreman sign-up | 🔴 Blocking | Open |
-| 3 | Worker sign-up: `company_id` is null — worker can't see foreman's jobs | 🔴 Blocking | Open |
-| 4 | No worker invite / join-company flow | 🟡 High | Open |
+| 1 | Schema not applied to live Supabase project | 🔴 Blocking | ✅ Done 2026-04-02 |
+| 2 | No company creation flow after foreman sign-up | 🔴 Blocking | ✅ Done 2026-04-02 — `/onboarding` |
+| 3 | Worker sign-up: `company_id` is null — worker can't see jobs | 🔴 Blocking | ✅ Done 2026-04-02 — `/join` |
+| 4 | No worker invite / join-company flow | 🟡 High | ✅ Done 2026-04-02 — invite code on dashboard |
 | 5 | Rate Sheet not in Next.js app | 🟡 High | Open |
 | 6 | Gross margin tracking not in Next.js app | 🟡 High | Open |
 | 7 | Change order flow not in Next.js app | 🟠 Medium | Open |
@@ -534,3 +561,4 @@ Before the live app can accept real users:
 | 2026-03-31 | `main` | Vercel deployment wired; GitHub repo created as `crewpay` |
 | 2026-04-01 | `chore/rename-to-crewmate` | Renamed all `crewpay`/`CrewPay` references to `crewmate`/`Crewmate`; GitHub repo renamed; Vercel project renamed; new dedicated Supabase project `xhoxxpddmpwcrhqapbqz` created and env vars updated |
 | 2026-04-01 | `chore/update-project-map` | Rebuilt PROJECT_MAP.md to full ArbitrageIQ/CellarMate standard with boundary declaration, screen inventory, guardrails, branch strategy, open issues, session history |
+| 2026-04-02 | `feature/onboarding` | Applied `initial_schema` migration to live Supabase (incl. `companies.invite_code`). Built `/onboarding` (foreman company creation), `/join` (worker invite code flow). Updated login redirects to route based on `company_id` state. Added invite code card to foreman dashboard. Build clean, deployed READY to production. |
