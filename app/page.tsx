@@ -25,24 +25,41 @@ export default function LoginPage() {
     if (mode === 'login') {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) { setError(error.message); setLoading(false); return }
-      // Determine role and redirect
+
+      // Fetch profile to determine where to send the user
       const { data: profile } = await supabase
-        .from('profiles').select('role').eq('id', data.user.id).single()
-      router.push(profile?.role === 'worker' ? '/worker' : '/foreman/dashboard')
+        .from('profiles')
+        .select('role, company_id')
+        .eq('id', data.user.id)
+        .single()
+
+      if (!profile) { router.push('/'); return }
+
+      if (profile.role === 'foreman') {
+        // Foreman with no company → finish onboarding
+        router.push(profile.company_id ? '/foreman/dashboard' : '/onboarding')
+      } else {
+        // Worker with no company → join flow
+        router.push(profile.company_id ? '/worker' : '/join')
+      }
     } else {
       // Sign up
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) { setError(error.message); setLoading(false); return }
+
       if (data.user) {
         // Create profile
-        await supabase.from('profiles').insert({
+        const { error: profileErr } = await supabase.from('profiles').insert({
           id: data.user.id,
           full_name: name,
           role,
           trade: trade || null,
           rate_per_hour: parseFloat(rate) || 0,
         })
-        router.push(role === 'worker' ? '/worker' : '/foreman/dashboard')
+        if (profileErr) { setError(profileErr.message); setLoading(false); return }
+
+        // Foreman → create company; Worker → join company
+        router.push(role === 'foreman' ? '/onboarding' : '/join')
       }
     }
     setLoading(false)
